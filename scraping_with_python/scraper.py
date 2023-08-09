@@ -70,7 +70,8 @@ def send_top_stories(hn):
         data=json.dumps(
             {
                 "topic": "tophnstories",
-                "title": "Todays top Stories!",
+                "title": "Todays top HackerNet Stories!",
+                "tags": ["computer", "skull"],
                 "message": data,
                 "actions": actions,
             }
