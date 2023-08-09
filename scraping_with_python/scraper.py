@@ -7,7 +7,8 @@ def sort_stores_by_votes(hnlist):
     return sorted(hnlist, key=lambda k: k["votes"], reverse=True)
 
 
-def create_custom_hn(links, subtext, hn):
+def create_custom_hn(links, subtext):
+    hn = []
     for idx, item in enumerate(links):
         title = item.getText()
         href = item.get("href", None)
@@ -20,10 +21,10 @@ def create_custom_hn(links, subtext, hn):
 
 
 def get_n_hackernews(i):
-    hn = []
-    for num in range(1, i + 1):
+    l = []
+    for num in range(i):
         # Call hacker website and retreive its html document
-        res = requests.get(f"https://news.ycombinator.com/?p={num}")
+        res = requests.get(f"https://news.ycombinator.com/?p={num+1}")
 
         # Pass that html document to BeautifulSoup to create a soup object
         soup = BeautifulSoup(res.text, "html.parser")
@@ -31,8 +32,9 @@ def get_n_hackernews(i):
         links = soup.select(".titleline > a")
         subtext = soup.select(".subtext")
 
-        hn.extend(create_custom_hn(links, subtext, hn))
-    final_list = sort_stores_by_votes(hn)
+        l.extend(create_custom_hn(links, subtext))
+
+    final_list = sort_stores_by_votes(l)
     return final_list
 
 
@@ -61,13 +63,14 @@ def send_top_stories(hn):
             "url": link[2],
         },
     ]
-    headers = {"Title": "Todays Top Stories", "Tags": "computer", "Actions": actions}
+    headers = {"Title": "Todays Top Stories", "Tags": "computer"}
 
     res = requests.post(
         "https://ntfy.sh/",
         data=json.dumps(
             {
                 "topic": "tophnstories",
+                "title": "Todays top Stories!",
                 "message": data,
                 "actions": actions,
             }
@@ -78,6 +81,5 @@ def send_top_stories(hn):
 
 if __name__ == "__main__":
     hn = get_n_hackernews(1)
-    print(hn)
     send_top_stories(hn)
     print("done")
